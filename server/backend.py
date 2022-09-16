@@ -17,17 +17,17 @@ class Role():
         return hash((self.name, self.party))
 
 class Room():
-    def __init__(self, moderator: str):
+    def __init__(self, moderator: int):
         self.roles = {}
         self.players = set()
         self.moderator = moderator
         self.started = False
     
-    def add_player(self, user: str):
+    def add_player(self, user: int):
         if user != self.moderator:
             self.players.add(user)
 
-    def add_players(self, users: List[str]):
+    def add_players(self, users: List[int]):
         for user in users:
             self.add_player(user)
 
@@ -37,10 +37,10 @@ class Room():
         else:
             self.roles[role] = count
 
-    def remove_player(self, user: str):
+    def remove_player(self, user: int):
         self.players.discard(user)
 
-    def remove_players(self, users: List[str]):
+    def remove_players(self, users: List[int]):
         for user in users:
             self.remove_player(user)
     
@@ -53,7 +53,7 @@ class Room():
             if self.roles[role] < 0:
                 self.roles.pop(role)
 
-    def start_game(self) -> Dict[str, Role]:
+    def start_game(self) -> Dict[int, Role]:
         roles = []
         for role, count in self.roles.items():
             roles.extend([role] * count)
