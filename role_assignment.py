@@ -34,7 +34,7 @@ def get_user(ctx, identifier):
   return ctx.guild.get_member(int(identifier))
 
 def get_moderator(ctx,room_name):
-  return get_user(Rooms[room_name].moderator)
+  return get_user(ctx, Rooms[room_name].moderator)
 
 @bot.command(name="create")
 async def create_room(ctx, *args):
@@ -85,9 +85,10 @@ async def remove_player(ctx, *args):
   if not ctx.message.mentions:
     await ctx.author.send("Remove People by mentioning them with @ mentions.")
     return
-  for mem in ctx.message.mentions:
-    Rooms[args[0]].remove_player(mem.id)
+  Rooms[args[0]].remove_players([p.id for p in ctx.message.mentions])
   await get_moderator(ctx, args[0]).send("Removed Players %s from room %s" % (str([x.display_name for x in ctx.message.mentions]), args[0]))
+  for p in ctx.message.mentions:
+    p.send("You have been removed from room: %s" % args[0])
 
 @bot.command(name="invite")
 async def invite_player(ctx, *args):
@@ -100,9 +101,10 @@ async def invite_player(ctx, *args):
   if not ctx.message.mentions:
     await ctx.author.send("Invite People by mentioning them with @ mentions.")
     return
-  for mem in ctx.message.mentions:
-    Rooms[args[0]].add_player(mem.id)
+  Rooms[args[0]].add_players([p.id for p in ctx.message.mentions])
   await get_moderator(ctx, args[0]).send("Added Players %s to room %s" % (str([x.display_name for x in ctx.message.mentions]), args[0]))
+  for p in ctx.message.mentions:
+    p.send("You have been added to room: %s" % args[0])
 
 @bot.command(name="add")
 async def add_role(ctx, *args):
