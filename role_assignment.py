@@ -37,46 +37,47 @@ async def create_room(ctx, *args):
   Rooms[args[0]]=Room(moderator=ctx.author.id)
 
 @bot.command(name="join")
-async def join_room(ctx, args):
+async def join_room(ctx, *args):
   Rooms[args[0]].add_player(ctx.author.id)
 
 @bot.command(name="leave")
-async def leave_room(ctx, args):
+async def leave_room(ctx, *args):
   Rooms[args[0]].remove_player(ctx.author.id)
 
 @bot.command(name="remove")
-async def remove_player(ctx, args):
+async def remove_player(ctx, *args):
   Rooms[args[0]].remove_player(args[1])
 
 @bot.command(name="invite")
-async def invite_player(ctx, args):
+async def invite_player(ctx, *args):
   Rooms[args[0]].add_player(args[1])
 
 @bot.command(name="add")
-async def add_role(ctx, args):
+async def add_role(ctx, *args):
   Rooms[args[0]].add_role(args[1])
 
 @bot.command(name="subtract")
-async def subtract_role(ctx, args):
+async def subtract_role(ctx, *args):
   Rooms[args[0]].remove_role(args[1])
 
 @bot.command(name="start")
-async def assign_roles(ctx, args):
+async def assign_roles(ctx, *args):
   game=Rooms[args[0]].start_game()
-  members=ctx.guild.members()
+  members=ctx.guild.members
   members_map = {x.id : x for x in members}
-  members[Rooms[args[0]].moderator].send(game)
+  await ctx.author.send(game)
   for player,role in game.items:
-    members[player].send("Game: %s, Role: %s" % (args[0], role))
+    await members_map[player].send("Game: %s, Role: %s" % (args[0], role))
 
 @bot.command(name="list")
-async def list_room_info(ctx, args):
-  ctx.send("Room %s Info:\n%s" % (args[0], str(Rooms[args[0]].get_roles())))
+async def list_room_info(ctx, *args):
+  print(str(Rooms[args[0]].get_roles()))
+  await ctx.send("Room %s Info:\n%s" % (args[0], str(Rooms[args[0]].get_roles())))
 
 @bot.command(name="delete")
-async def delete_room(ctx, args):
+async def delete_room(ctx, *args):
   if args[0] in Rooms:
     del Rooms[args[0]]
-    ctx.send("Deleted Room %s" % args[0])
+    await ctx.send("Deleted Room %s" % args[0])
 
 bot.run(Token)
