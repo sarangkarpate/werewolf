@@ -85,6 +85,9 @@ async def remove_player(ctx, *args):
   if not ctx.message.mentions:
     await ctx.author.send("Remove People by mentioning them with @ mentions.")
     return
+  if not ctx.message.author.id == Rooms[args[0]].moderator:
+    await ctx.author.send("You must be the moderator for the room to remove players.")
+    return
   Rooms[args[0]].remove_players([p.id for p in ctx.message.mentions])
   await get_moderator(ctx, args[0]).send("Removed Players %s from room %s" % (str([x.display_name for x in ctx.message.mentions]), args[0]))
   for p in ctx.message.mentions:
@@ -117,6 +120,9 @@ async def add_role(ctx, *args):
   if len(args) ==1:
     await ctx.author.send("<role name> is a required argument to the !add command.")
     return
+  if not ctx.message.author.id == Rooms[args[0]].moderator:
+    await ctx.author.send("You must be the moderator for the room to add roles.")
+    return
   if len(args) >=3:
     Rooms[args[0]].add_role(args[1], int(args[2]))
     await get_moderator(ctx, args[0]).send("Added %i Roles %s to room %s" % (int(args[2]), args[1], args[0]))
@@ -135,6 +141,9 @@ async def subtract_role(ctx, *args):
   if len(args) ==1:
     await ctx.author.send("<role name> is a required argument to the !subtract command.")
     return
+  if not ctx.message.author.id == Rooms[args[0]].moderator:
+    await ctx.author.send("You must be the moderator for the room to subtract roles.")
+    return
   if len(args) >=3:
     Rooms[args[0]].remove_role(args[1], int(args[2]))
     await get_moderator(ctx, args[0]).send("Subtracted %i Roles %s to room %s" % (int(args[2]), args[1], args[0]))
@@ -149,6 +158,9 @@ async def assign_roles(ctx, *args):
     return
   if not args[0] in Rooms:
     await ctx.author.send("A room with the name '%s' doesn't exist." % args[0])
+    return
+  if not ctx.message.author.id == Rooms[args[0]].moderator:
+    await ctx.author.send("You must be the moderator for the room to start the room.")
     return
   game=Rooms[args[0]].start_game()
   game_description = str({get_user(ctx,player).display_name : role for player, role in game.items()})
@@ -174,6 +186,9 @@ async def delete_room(ctx, *args):
     return
   if not args[0] in Rooms:
     await ctx.author.send("A room with the name '%s' doesn't exist. It may have been deleted already" % args[0])
+    return
+  if not ctx.message.author.id == Rooms[args[0]].moderator:
+    await ctx.author.send("You must be the moderator for the room to delete rooms.")
     return
   if args[0] in Rooms:
     del Rooms[args[0]]
