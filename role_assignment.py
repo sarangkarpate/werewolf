@@ -7,49 +7,48 @@ Created on Thu Sep 15 17:00:51 2022
 @author: ian
 """
 
-# Permissions number: 399163731024
-
 import os
 import discord
 from discord.ext.commands import Bot
 import json
 from server.backend import Room,Role
 
-PREFIX='$'
+PREFIX='!'
 
-Token = os.getenv('DISCORD_TOKEN')
-if Token is None:
-  Token=""
+with open("config.json") as config_file:
+  config=json.load(config_file)
+Token = config['Token']
+
 Rooms = {}
-bot=discord.ext.commands.Bot(command_prefix=PREFIX, intents=discord.Intents.default())
 
-@bot.command()
-async def a_command(ctx, args):
-  print("finally")
 
-@bot.event
-async def on_message(message):
-  print("read message")
-  await bot.process_commands(message)
-'''
+# Note that the requested Permissions number should be: 399163731024
+requested_intents = discord.Intents.default()
+requested_intents.message_content = True
+bot=discord.ext.commands.Bot(command_prefix=PREFIX, intents=requested_intents)
+
 @bot.command(name="create")
 async def create_room(ctx, *args):
-  Rooms[args[1]]=Room(moderator=ctx.sender)
+  print("creating")
+  print(args)
+  if not args:
+    print("Need room name.")
+  Rooms[args[0]]=Room(moderator=ctx)
 
 @bot.command(name="join")
 async def join_room(ctx, *args):
-  print()
+  print("joining")
 
 @bot.command(name="leave")
 async def leave_room(ctx, *args):
-  print()
+  print("leaving")
 
 @bot.command(name="remove")
 async def remove_player(ctx, *args):
   print()
 
 @bot.command(name="invite")
-async def remove_player(ctx, *args):
+async def invite_player(ctx, *args):
   print()
 
 @bot.command(name="add")
@@ -71,5 +70,5 @@ async def list_room_info(ctx, *args):
 @bot.command(name="delete")
 async def delete_room(ctx, *args):
   print()
-'''
+
 bot.run(Token)
