@@ -44,21 +44,23 @@ class Room():
         for user in users:
             self.remove_player(user)
     
-    def remove_role(self, role: Role, count: int = 1):
+    # -1 count means to remove all roles
+    def remove_role(self, role: Role, count: int = -1):
+        if count == -1:
+            self.roles.pop(role)
         if role in self.roles:
-            self.roles[role] = max(0, self.roles[role] - count)
+            self.roles[role] = self.roles[role] - count
+            if self.roles[role] < 0:
+                self.roles.pop(role)
 
     def start_game(self) -> Dict[str, Role]:
         roles = []
         for role, count in self.roles.items():
-
             roles.extend([role] * count)
 
         players = list(self.players)
-        print(roles)
-        print(players)
-        assert len(roles) == len(players)
-        random.shuffle(players)
+        assert len(roles) == len(self.players)
+        random.shuffle(roles)
 
         assigned_roles = {}
         for i, player in enumerate(players):
