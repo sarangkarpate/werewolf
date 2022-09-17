@@ -50,16 +50,16 @@ async def create_room(ctx, *args):
 @bot.command(name="join")
 async def join_room(ctx, *args):
   if not args:
-    ctx.author.send("<room name> is a required argument to the !join command.")
+    await ctx.author.send("<room name> is a required argument to the !join command.")
     return
   if not args[0] in Rooms:
-    ctx.author.send("A room with the name '%s' doesn't exist." % args[0])
+    await ctx.author.send("A room with the name '%s' doesn't exist." % args[0])
     return
   if ctx.author.id in Rooms[args[0]].players:
-    ctx.author.send("You are already in room %s" % args[0])
+    await ctx.author.send("You are already in room %s" % args[0])
     return
   Rooms[args[0]].add_player(ctx.author.id)
-  ctx.author.send("You have joined room %s" % args[0])
+  await ctx.author.send("You have joined room %s" % args[0])
 
 @bot.command(name="leave")
 async def leave_room(ctx, *args):
