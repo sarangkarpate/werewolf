@@ -30,7 +30,11 @@ def get_moderator(ctx, room_name):
     :param room_name:
     :return: Optional[Member]
     """
-    return get_user(ctx, Rooms[room_name].moderator)
+    if ctx.guild:
+        return get_user(ctx, Rooms[room_name].moderator)
+    else:
+        # For DM scenarios
+        return ctx.author
 
 
 @bot.command(name="create", brief="<room> Creates a room (village)", description="Use this command to create a room."
