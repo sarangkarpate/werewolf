@@ -31,3 +31,13 @@ def fetch_bot_command_prefix():
     with open("config.json") as config_file:
         config = json.load(config_file)
         return config[PREFIX_KEY]
+
+
+def get_user(ctx, identifier):
+    """
+    Helper method that gets a User based on Context and an Identifier
+    :param ctx: Context
+    :param identifier: String
+    :return: Optional[Member]
+    """
+    return ctx.guild.get_member(int(identifier))
