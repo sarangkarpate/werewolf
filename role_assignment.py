@@ -235,6 +235,9 @@ async def list_all_rooms(ctx):
     for room in Rooms:
         response_msg += "Room: " + str(room) + ": Moderator: " + str(
             get_user(ctx, int(Rooms[room].moderator)).display_name) + "\n"
+    if not response_msg:
+        # No Rooms available yet
+        response_msg =  "No rooms have been created yet!"
     await ctx.send(response_msg)
 
 
