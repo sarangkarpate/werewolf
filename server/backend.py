@@ -1,9 +1,8 @@
-
 import random
 from typing import Dict, List
 
 
-class Role():
+class Role:
     def __init__(self, name: str, party: str):
         self.name = name
         self.party = party
@@ -16,13 +15,14 @@ class Role():
     def __hash__(self) -> int:
         return hash((self.name, self.party))
 
+
 class Room():
     def __init__(self, moderator: int):
         self.roles = {}
         self.players = set()
         self.moderator = moderator
         self.started = False
-    
+
     def add_player(self, user: int):
         if user != self.moderator:
             self.players.add(user)
@@ -43,7 +43,7 @@ class Room():
     def remove_players(self, users: List[int]):
         for user in users:
             self.remove_player(user)
-    
+
     # -1 count means to remove all roles
     def remove_role(self, role: Role, count: int = -1):
         if count == -1:
@@ -69,5 +69,14 @@ class Room():
         return assigned_roles
 
     def get_roles(self) -> Dict[Role, int]:
+        """
+        Returns a mapping of Role to the ID of the player
+        :return: Dict
+        """
         return self.roles
 
+    def fetch_player_count(self) -> int:
+        return len(self.players)
+
+    def fetch_role_count(self) -> int:
+        return len(self.roles)
