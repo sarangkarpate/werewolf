@@ -33,7 +33,8 @@ def get_moderator(ctx, room_name):
     return get_user(ctx, Rooms[room_name].moderator)
 
 
-@bot.command(name="create")
+@bot.command(name="create", brief="<room> Creates a room (village)", description="Use this command to create a room."
+                                                                                 "Syntax: create <room_name>")
 async def create_room(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !create command.")
@@ -46,9 +47,8 @@ async def create_room(ctx, *args):
     await get_moderator(ctx, room).send("Room %s created." % room)
 
 
-
-
-@bot.command(name="join")
+@bot.command(name="join", brief="<room> Joins a room", description="Use this command to join a room."
+                                                                   "Syntax: join <room_name>")
 async def join_room(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !join command.")
@@ -64,9 +64,8 @@ async def join_room(ctx, *args):
     await ctx.author.send("You have joined room %s" % room)
 
 
-
-
-@bot.command(name="leave")
+@bot.command(name="leave", brief="<room> Leaves a room", description="Use this command to leave a room."
+                                                                     "Syntax: leave <room_name>")
 async def leave_room(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !leave command.")
@@ -81,7 +80,9 @@ async def leave_room(ctx, *args):
     await ctx.author.send("You have left room %s" % room)
 
 
-@bot.command(name="remove")
+@bot.command(name="remove", brief="<room> <player1> <player2> ... Removes players from the room",
+             description="Use this command to remove players from a room."
+                         "Syntax: remove <room_name> <player1> <player2> ...")
 async def remove_player(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !remove command.")
@@ -103,9 +104,9 @@ async def remove_player(ctx, *args):
         await p.send("You have been removed from room: %s" % room)
 
 
-
-
-@bot.command(name="invite")
+@bot.command(name="invite", brief="<room> <player1> <player2> ... Invites players to the room",
+             description="Use this command to invite players to a room."
+                         "Syntax: invite <room_name> <player1> <player2> ...")
 async def invite_player(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !invite command.")
@@ -125,9 +126,10 @@ async def invite_player(ctx, *args):
         await p.send("You have been added to room: %s" % room)
 
 
-
-
-@bot.command(name="add")
+@bot.command(name="add", brief="<room> <role> OR <room> <role> <count> Add roles to a room",
+             description="Use this command to add roles to a room."
+                         "Syntax: add <room> <role> - This adds a role to a room "
+                         "OR add <room> <role> <count> - This adds <count> number of roles to a room")
 async def add_role(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !add command.")
@@ -152,9 +154,10 @@ async def add_role(ctx, *args):
         await get_moderator(ctx, room).send("Added %i Roles %s to room %s" % (role_count, role_name, room))
 
 
-
-
-@bot.command(name="subtract")
+@bot.command(name="subtract", brief="<room> <role> OR <room> <role> <count> Removes roles from a room",
+             description="Use this command to remove roles from a room."
+                         "Syntax: subtract <room> <role> - This removes one <role> from a room "
+                         "OR add <room> <role> <count> - This removes <count> number of roles from a room")
 async def subtract_role(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !subtract command.")
@@ -179,9 +182,9 @@ async def subtract_role(ctx, *args):
         await get_moderator(ctx, room).send("Subtracted %i Roles %s to room %s" % (role_count, role_name, room))
 
 
-
-
-@bot.command(name="start")
+@bot.command(name="start", brief="<room> Starts a game; assigns roles",
+             description="Use this command to start a game."
+                         "Syntax: start <room> - This assigns roles to all players (sends a DM as well); also sends moderator a list of all role - players mapping")
 async def assign_roles(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !start command.")
@@ -207,9 +210,7 @@ async def assign_roles(ctx, *args):
         await get_moderator(ctx, room).send(error_message)
 
 
-
-
-@bot.command(name="list")
+@bot.command(name="list", brief="<room> Lists all roles and players in a room")
 async def list_room_info(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !list command.")
@@ -223,7 +224,35 @@ async def list_room_info(ctx, *args):
         str([get_user(ctx, x).display_name for x in Rooms[room].players]), str(Rooms[room].get_roles())))
 
 
-@bot.command(name="delete")
+@bot.command(name="lists", brief="Lists all rooms and associated moderators",
+             description="List all Rooms and their moderators")
+async def list_all_rooms(ctx):
+    response_msg = ""
+    for room in Rooms:
+        response_msg += "Room: " + str(room) + ": Moderator: " + str(
+            get_user(ctx, int(Rooms[room].moderator)).display_name) + "\n"
+    await ctx.send(response_msg)
+
+
+@bot.command(name="reveal", brief="<room> Reveals all players and roll mapping in a room, send a DM to moderator",
+             description=" Mod restricted. use reveal <room> to receive a DM")
+async def reveal_room_info(ctx, *args):
+    if not args:
+        await ctx.author.send("<room name> is a required argument to the reveal command")
+        return
+    room = args[0]
+    if room not in Rooms:
+        await ctx.author.send("A room with the name '%s' doesn't exist." % room)
+        return
+    if not ctx.message.author.id == Rooms[room].moderator:
+        await ctx.author.send("You must be the moderator for the room to reveal roles.")
+        return
+    await get_moderator(ctx, room).send("Room: %s\nModerator: %s\nPlayers: %s\nRoles:\n%s" % (
+        room, get_user(ctx, int(Rooms[room].moderator)).display_name,
+        str([get_user(ctx, x).display_name for x in Rooms[room].players]), str(Rooms[room].get_roles())))
+
+
+@bot.command(name="delete", brief="<room> Deletes a room")
 async def delete_room(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !delete command.")
@@ -237,8 +266,6 @@ async def delete_room(ctx, *args):
         return
     del Rooms[room]
     await ctx.send("Deleted Room %s" % room)
-
-
 
 
 bot.run(fetch_bot_token())
