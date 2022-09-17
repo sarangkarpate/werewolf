@@ -22,6 +22,7 @@ class Room():
         self.players = set()
         self.moderator = moderator
         self.started = False
+        self.assigned_roles = {}
 
     def add_player(self, user: int):
         if user != self.moderator:
@@ -64,11 +65,12 @@ class Room():
                                                                                                        len(self.players)))
         random.shuffle(roles)
 
-        assigned_roles = {}
+        # Resetting assigned roles
+        self.assigned_roles = {}
         for i, player in enumerate(players):
-            assigned_roles[player] = roles[i]
+            self.assigned_roles[player] = roles[i]
 
-        return assigned_roles
+        return self.assigned_roles
 
     def get_roles(self) -> Dict[Role, int]:
         """

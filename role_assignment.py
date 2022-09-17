@@ -234,8 +234,8 @@ async def list_all_rooms(ctx):
     await ctx.send(response_msg)
 
 
-@bot.command(name="reveal", brief="<room> Reveals all players and roll mapping in a room, send a DM to moderator",
-             description=" Mod restricted. use reveal <room> to receive a DM")
+@bot.command(name="reveal", brief="<room> Reveals all players and roll mapping in a room",
+             description=" Mod restricted. use reveal <room> to reveal true colors!")
 async def reveal_room_info(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the reveal command")
@@ -247,9 +247,9 @@ async def reveal_room_info(ctx, *args):
     if not ctx.message.author.id == Rooms[room].moderator:
         await ctx.author.send("You must be the moderator for the room to reveal roles.")
         return
-    await get_moderator(ctx, room).send("Room: %s\nModerator: %s\nPlayers: %s\nRoles:\n%s" % (
-        room, get_user(ctx, int(Rooms[room].moderator)).display_name,
-        str([get_user(ctx, x).display_name for x in Rooms[room].players]), str(Rooms[room].get_roles())))
+
+    game_description = str({get_user(ctx, player).display_name: role for player, role in Rooms[room].assigned_roles.items()})
+    await ctx.send(game_description)
 
 
 @bot.command(name="delete", brief="<room> Deletes a room")
