@@ -7,20 +7,12 @@ Created on Thu Sep 15 17:00:51 2022
 @author: ian
 """
 
-import os
 import discord
 from discord.ext.commands import Bot
-import json
 from server.backend import Room,Role
-
-PREFIX='!'
-
-with open("config.json") as config_file:
-  config=json.load(config_file)
-Token = config['Token']
+from util.utils import fetch_bot_token, fetch_bot_command_prefix
 
 Rooms = {}
-
 
 # Note that the requested Permissions number was created with: 399163731024
 requested_intents = discord.Intents.default()
@@ -28,7 +20,7 @@ requested_intents = discord.Intents.default()
 requested_intents.message_content = True
 # Requires turning on Member Intent on the bot page of discord.com/developers. This is required to look up members by ID to message them.
 requested_intents.members = True
-bot=discord.ext.commands.Bot(command_prefix=PREFIX, intents=requested_intents)
+bot=discord.ext.commands.Bot(command_prefix=fetch_bot_command_prefix(), intents=requested_intents)
 
 def get_user(ctx, identifier):
   return ctx.guild.get_member(int(identifier))
@@ -87,4 +79,4 @@ async def delete_room(ctx, *args):
     del Rooms[args[0]]
     await ctx.send("Deleted Room %s" % args[0])
 
-bot.run(Token)
+bot.run(fetch_bot_token())
