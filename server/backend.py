@@ -59,7 +59,9 @@ class Room():
             roles.extend([role] * count)
 
         players = list(self.players)
-        assert len(roles) == len(self.players)
+        if len(roles) != len(self.players):
+            raise Exception("Cannot start game because Role count is {} and Player count is {}".format(len(roles),
+                                                                                                       len(self.players)))
         random.shuffle(roles)
 
         assigned_roles = {}
@@ -74,9 +76,3 @@ class Room():
         :return: Dict
         """
         return self.roles
-
-    def fetch_player_count(self) -> int:
-        return len(self.players)
-
-    def fetch_role_count(self) -> int:
-        return len(self.roles)

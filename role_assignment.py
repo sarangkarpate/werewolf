@@ -188,13 +188,11 @@ async def assign_roles(ctx, *args):
         await get_user(ctx, village.moderator).send(game_description)
         for player, role in game.items():
             await get_user(ctx, player).send("Game: %s, Role: %s" % (room, role))
-    except AssertionError as msg:
+    except Exception as msg:
         # Role count is not the same as Player count while starting the game
-        print(msg)
-        await get_moderator(ctx, room).send(
-            "Cannot start game for room: {} because Role count is {} and Player count is {}".format(room,
-                                                                                                    village.fetch_role_count(),
-                                                                                                    village.fetch_player_count()))
+        error_message = str(msg) + " for room: " + str(room)
+        print(error_message)
+        await get_moderator(ctx, room).send(error_message)
 
 
 @bot.command(name="list")
