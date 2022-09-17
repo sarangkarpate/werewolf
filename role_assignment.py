@@ -9,8 +9,8 @@ Created on Thu Sep 15 17:00:51 2022
 
 import discord
 from discord.ext.commands import Bot
-from server.backend import Room,Role
-from util.utils import fetch_bot_token, fetch_bot_command_prefix
+from server.backend import Room, Role
+from util.utils import fetch_bot_token, fetch_bot_command_prefix, get_user
 
 Rooms = {}
 
@@ -20,10 +20,8 @@ requested_intents = discord.Intents.default()
 requested_intents.message_content = True
 # Requires turning on Member Intent on the bot page of discord.com/developers. This is required to look up members by ID to message them.
 requested_intents.members = True
-bot=discord.ext.commands.Bot(command_prefix=fetch_bot_command_prefix(), intents=requested_intents)
+bot = discord.ext.commands.Bot(command_prefix=fetch_bot_command_prefix(), intents=requested_intents)
 
-def get_user(ctx, identifier):
-  return ctx.guild.get_member(int(identifier))
 
 def get_moderator(ctx,room_name):
   return get_user(ctx, Rooms[room_name].moderator)
@@ -40,6 +38,7 @@ async def create_room(ctx, *args):
   Rooms[room] = Room(moderator = ctx.author.id)
   await get_moderator(ctx, room).send("Room %s created." % room)
 
+
 @bot.command(name="join")
 async def join_room(ctx, *args):
   if not args:
@@ -54,6 +53,7 @@ async def join_room(ctx, *args):
     return
   Rooms[room].add_player(ctx.author.id)
   await ctx.author.send("You have joined room %s" % room)
+
 
 @bot.command(name="leave")
 async def leave_room(ctx, *args):
@@ -89,6 +89,7 @@ async def remove_player(ctx, *args):
   for p in ctx.message.mentions:
     await p.send("You have been removed from room: %s" % room)
 
+
 @bot.command(name="invite")
 async def invite_player(ctx, *args):
   if not args:
@@ -105,6 +106,7 @@ async def invite_player(ctx, *args):
   await get_moderator(ctx, room).send("Added Players %s to room %s" % (str([x.display_name for x in ctx.message.mentions]), room))
   for p in ctx.message.mentions:
     await p.send("You have been added to room: %s" % room)
+
 
 @bot.command(name="add")
 async def add_role(ctx, *args):
@@ -130,6 +132,7 @@ async def add_role(ctx, *args):
     Rooms[room].add_role(role_name, role_count)
     await get_moderator(ctx, room).send("Added %i Roles %s to room %s" % (role_count, role_name, room))
 
+
 @bot.command(name="subtract")
 async def subtract_role(ctx, *args):
   if not args:
@@ -154,6 +157,7 @@ async def subtract_role(ctx, *args):
     Rooms[room].remove_role(role_name, role_count)
     await get_moderator(ctx, room).send("Subtracted %i Roles %s to room %s" % (role_count, role_name, room))
 
+
 @bot.command(name="start")
 async def assign_roles(ctx, *args):
   if not args:
@@ -171,6 +175,7 @@ async def assign_roles(ctx, *args):
   await get_user(ctx,Rooms[room].moderator).send(game_description)
   for player,role in game.items():
     await get_user(ctx,player).send("Game: %s, Role: %s" % (room, role))
+
 
 @bot.command(name="list")
 async def list_room_info(ctx, *args):
@@ -197,5 +202,6 @@ async def delete_room(ctx, *args):
     return
   del Rooms[room]
   await ctx.send("Deleted Room %s" % room)
+
 
 bot.run(fetch_bot_token())
