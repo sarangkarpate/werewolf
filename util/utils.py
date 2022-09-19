@@ -41,3 +41,16 @@ def get_user(ctx, identifier):
     :return: Optional[Member]
     """
     return ctx.guild.get_member(int(identifier))
+
+
+def pretty_print_dictionary(input_dictionary):
+    """
+    Given an input Dictionary - provides a pretty-printed string
+    :param input_dictionary: Dictionary
+    :return: String
+    """
+    response = ""
+    print(input_dictionary)
+    for item in sorted(input_dictionary):
+        response += str(item) + " : " + str(input_dictionary[item]) + "\n"
+    return response

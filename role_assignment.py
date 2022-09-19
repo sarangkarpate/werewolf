@@ -10,7 +10,7 @@ Created on Thu Sep 15 17:00:51 2022
 import discord
 from discord.ext.commands import Bot
 from server.backend import Room, Role
-from util.utils import fetch_bot_token, fetch_bot_command_prefix, get_user
+from util.utils import fetch_bot_token, fetch_bot_command_prefix, get_user, pretty_print_dictionary
 
 Rooms = {}
 
@@ -203,7 +203,7 @@ async def assign_roles(ctx, *args):
         return
     try:
         game = village.start_game()
-        game_description = str({get_user(ctx, player).display_name: role for player, role in game.items()})
+        game_description = pretty_print_dictionary({get_user(ctx, player).display_name: role for player, role in game.items()})
         await get_user(ctx, village.moderator).send(game_description)
         for player, role in game.items():
             await get_user(ctx, player).send("Game: %s, Role: %s" % (room, role))
@@ -223,12 +223,12 @@ async def list_room_info(ctx, *args):
     if room not in Rooms:
         await ctx.author.send("A room with the name '%s' doesn't exist." % room)
         return
-    await ctx.send("Room: %s\nModerator: %s\nPlayers: %s\nRoles:\n%s" % (
+    await ctx.send("Room: %s\nModerator: %s\nPlayers: %s\nRoles\n-----------\n%s" % (
         room, get_user(ctx, int(Rooms[room].moderator)).display_name,
-        str([get_user(ctx, x).display_name for x in Rooms[room].players]), str(Rooms[room].get_roles())))
+        str([get_user(ctx, x).display_name for x in Rooms[room].players]), str(Rooms[room].get_role_information())))
 
 
-@bot.command(name="lists", brief="Lists all rooms and associated moderators",
+@bot.command(name="listrooms", brief="Lists all rooms and associated moderators",
              description="List all Rooms and their moderators")
 async def list_all_rooms(ctx):
     response_msg = ""
@@ -255,7 +255,8 @@ async def reveal_room_info(ctx, *args):
         await ctx.author.send("You must be the moderator for the room to reveal roles.")
         return
 
-    game_description = str({get_user(ctx, player).display_name: role for player, role in Rooms[room].assigned_roles.items()})
+    game_mapping = {get_user(ctx, player).display_name: role for player, role in Rooms[room].assigned_roles.items()}
+    game_description = pretty_print_dictionary(game_mapping)
     await ctx.send(game_description)
 
 

@@ -1,5 +1,6 @@
 import random
 from typing import Dict, List
+from util.utils import pretty_print_dictionary
 
 
 class Role:
@@ -72,9 +73,9 @@ class Room():
 
         return self.assigned_roles
 
-    def get_roles(self) -> Dict[Role, int]:
+    def get_role_information(self) -> Dict[Role, int]:
         """
-        Returns a mapping of Role to the ID of the player
+        Returns a pretty-printed mapping of Roles to counts
         :return: Dict
         """
-        return self.roles
+        return pretty_print_dictionary(self.roles)
