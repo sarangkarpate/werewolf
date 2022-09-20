@@ -207,6 +207,7 @@ async def assign_roles(ctx, *args):
         await get_user(ctx, village.moderator).send(game_description)
         for player, role in game.items():
             await get_user(ctx, player).send("Game: %s, Role: %s" % (room, role))
+        village.started = True
     except Exception as msg:
         # Role count is not the same as Player count while starting the game
         error_message = str(msg) + " for room: " + str(room)
@@ -274,6 +275,30 @@ async def delete_room(ctx, *args):
         return
     del Rooms[room]
     await ctx.send("Deleted Room %s" % room)
+
+@bot.command(name="update_moderator", brief="<room> <new player> updates moderator", description="Use this command for the current moderator to update to a new moderator for the given room"
+                                                                                 "Syntax: update_moderator <room_name> <new_moderator>")
+async def update_moderator(ctx, *args):
+    if len(args) != 2:
+        await ctx.author.send("<room name> and <new_moderator> are the required argument to the !update_moderator command.")
+        return
+    room = args[0]
+    new_moderator = ctx.message.mentions[0]
+    if not ctx.message.author.id == Rooms[room].moderator:
+        await ctx.author.send("You must be the current moderator to update or change moderators")
+        return
+    if new_moderator.id == Rooms[room].moderator:
+        await ctx.author.send("'%s' is already the moderator of this room." % new_moderator)
+        return
+    if new_moderator.id in Rooms[room].players:
+        Rooms[room].remove_player(new_moderator.id)
+        await ctx.author.send("'%s' has been removed from the players list" % new_moderator)
+    Rooms[room].moderator = new_moderator.id
+    await new_moderator.send("Congratulations! You are the moderator of %s." % room)
+    if Rooms[room].started == True:
+        game_description = pretty_print_dictionary(
+            {get_user(ctx, player).display_name: role for player, role in Rooms[room].assigned_roles.items()})
+        await get_user(ctx, Rooms[room].moderator).send(game_description)
 
 
 bot.run(fetch_bot_token())
