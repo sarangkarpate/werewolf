@@ -50,6 +50,22 @@ async def create_room(ctx, *args):
     Rooms[room] = Room(moderator=ctx.author.id)
     await get_moderator(ctx, room).send("Room %s created." % room)
 
+@bot.command(name="create_open", brief="<room> Creates a room (village)",
+             description="Use this command to create a room where anyone can add roles"
+                         "Syntax: create <room_name>")
+async def create_room(ctx, *args):
+    if not args:
+        await ctx.author.send("<room name> is a required argument to the !create command.")
+        return
+    room = args[0]
+    if room in Rooms:
+        await ctx.author.send("A room with the name '%s' already exists." % room)
+        return
+    Rooms[room] = Room(moderator=ctx.author.id,open=True)
+    print('')
+    await get_moderator(ctx, room).send("Room %s created. This is an open room so anyone may add roles." % room)
+    await ctx.send("It takes a village to make a village. Anyone may add roles to %s." %room)
+
 
 @bot.command(name="join", brief="<room> Joins a room", description="Use this command to join a room."
                                                                    "Syntax: join <room_name>")
@@ -142,7 +158,7 @@ async def add_role(ctx, *args):
     if not room in Rooms:
         await ctx.author.send("A room with the name '%s' doesn't exist." % room)
         return
-    if not ctx.message.author.id == Rooms[room].moderator:
+    if not ctx.message.author.id == Rooms[room].moderator and Rooms[room].open == False:
         await ctx.author.send("You must be the moderator for the room to add roles.")
         return
     if len(args) == 1:
@@ -259,6 +275,7 @@ async def reveal_room_info(ctx, *args):
     game_mapping = {get_user(ctx, player).display_name: role for player, role in Rooms[room].assigned_roles.items()}
     game_description = pretty_print_dictionary(game_mapping)
     await ctx.send(game_description)
+    Rooms[room].started = False
 
 
 @bot.command(name="delete", brief="<room> Deletes a room")
@@ -276,8 +293,9 @@ async def delete_room(ctx, *args):
     del Rooms[room]
     await ctx.send("Deleted Room %s" % room)
 
-@bot.command(name="update_moderator", brief="<room> <new player> updates moderator", description="Use this command for the current moderator to update to a new moderator for the given room"
-                                                                                 "Syntax: update_moderator <room_name> <new_moderator>")
+@bot.command(name="update_moderator", brief="<room> <new player> updates moderator",
+             description="Use this command for the current moderator to update to a new moderator for the given room"
+             "Syntax: update_moderator <room_name> <new_moderator>")
 async def update_moderator(ctx, *args):
     if len(args) != 2:
         await ctx.author.send("<room name> and <new_moderator> are the required argument to the !update_moderator command.")
@@ -300,5 +318,21 @@ async def update_moderator(ctx, *args):
             {get_user(ctx, player).display_name: role for player, role in Rooms[room].assigned_roles.items()})
         await get_user(ctx, Rooms[room].moderator).send(game_description)
 
+@bot.command(name="close_add", brief="<room> makes permission so only moderator can add roles",
+             description="Use this command so that a open room will only allow moderator to add roles"
+             "Syntax: update_moderator <room_name> <new_moderator>")
+async def close_add(ctx, *args):
+    if not args:
+        await ctx.author.send("<room name> is a required argument to the !close_add command.")
+        return
+    room = args[0]
+    if not ctx.message.author.id == Rooms[room].moderator:
+        await ctx.author.send("You must be the current moderator to update the village open attribute")
+        return
+    if Rooms[room].open == False:
+        await ctx.author.send("This room is already closed- only you can add new roles")
+        return
+    Rooms[room].open = False
+    await get_moderator(ctx, room).send("Room %s can now only have rolls added by you." % room)
 
 bot.run(fetch_bot_token())

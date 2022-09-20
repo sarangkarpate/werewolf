@@ -18,12 +18,13 @@ class Role:
 
 
 class Room():
-    def __init__(self, moderator: int):
+    def __init__(self, moderator: int, open=False):
         self.roles = {}
         self.players = set()
         self.moderator = moderator
         self.started = False
         self.assigned_roles = {}
+        self.open = open
 
     def add_player(self, user: int):
         if user != self.moderator:
