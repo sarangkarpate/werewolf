@@ -48,22 +48,31 @@ async def create_room(ctx, *args):
         await ctx.author.send("A room with the name '%s' already exists." % room)
         return
     Rooms[room] = Room(moderator=ctx.author.id)
+
+    ###code to add a join button
+    button = discord.ui.Button(label="Join village", emoji="🐺", style=discord.ButtonStyle.green)
+    async def button_callback(interaction):
+        if interaction.user.id in Rooms[room].players:
+            await interaction.user.send("You are already in room %s" % room)
+            return
+        Rooms[room].add_player(interaction.user.id)
+        await interaction.user.send("You have joined room %s" % room)
+    button.callback = button_callback
+    view = discord.ui.View()
+    view.add_item(button)
+    await ctx.send("Join the new %s village by clicking here! Note: expect an 'This interaction failed'- don't worry "
+                   "you are still added to the game!" % room, view=view)
+
     await get_moderator(ctx, room).send("Room %s created." % room)
 
 @bot.command(name="create_open", brief="<room> Creates a room (village)",
              description="Use this command to create a room where anyone can add roles"
                          "Syntax: create <room_name>")
-async def create_room(ctx, *args):
-    if not args:
-        await ctx.author.send("<room name> is a required argument to the !create command.")
-        return
+async def create_room_open(ctx, *args):
+    await create_room(ctx, *args)
     room = args[0]
-    if room in Rooms:
-        await ctx.author.send("A room with the name '%s' already exists." % room)
-        return
-    Rooms[room] = Room(moderator=ctx.author.id,open=True)
-    print('')
-    await get_moderator(ctx, room).send("Room %s created. This is an open room so anyone may add roles." % room)
+    Rooms[room].open = True
+    await get_moderator(ctx, room).send("Room %s is an open room so anyone may add roles." % room)
     await ctx.send("It takes a village to make a village. Anyone may add roles to %s." %room)
 
 
