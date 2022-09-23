@@ -59,3 +59,19 @@ def pretty_print_dictionary(input_dictionary: Dict[Any, Any]) -> str:
     for item in sorted(input_dictionary):
         response += str(item) + " : " + str(input_dictionary[item]) + "\n"
     return response
+
+
+def get_moderator(
+    ctx: discord.ext.commands.Context, room_name: str, self.Rooms: dict
+) -> Optional[discord.Member]:
+    """
+    Gets a moderator based on context.
+    :param ctx:
+    :param room_name:
+    :return: Optional[Member]
+    """
+    if ctx.guild:
+        return get_user(ctx, self.Rooms[room_name].moderator)
+    else:
+        # For DM scenarios
+        return ctx.author
