@@ -66,11 +66,12 @@ async def create_room(ctx, *args):
             return
         Rooms[room].add_player(interaction.user.id)
         await interaction.user.send("You have joined room %s" % room)
+        await interaction.response.edit_message(content="Join the new %s village by clicking here! %s has joined"
+                                                        % (room, interaction.user.display_name))
     button.callback = button_callback
     view = discord.ui.View()
     view.add_item(button)
-    await ctx.send("Join the new %s village by clicking here! Note: expect an 'This interaction failed'- don't worry "
-                   "you are still added to the game!" % room, view=view)
+    await ctx.send("Join the new %s village by clicking here!" % room, view=view)
 
     await get_moderator(ctx, room).send("Room %s created." % room)
 
@@ -257,7 +258,8 @@ async def subtract_role(ctx, *args):
 
 @bot.command(name="start", brief="<room> Starts a game; assigns roles",
              description="Use this command to start a game."
-                         "Syntax: start <room> - This assigns roles to all players (sends a DM as well); also sends moderator a list of all role - players mapping")
+                         "Syntax: start <room> - This assigns roles to all players (sends a DM as well); "
+                         "also sends moderator a list of all role - players mapping")
 async def assign_roles(ctx, *args):
     if not args:
         await ctx.author.send("<room name> is a required argument to the !start command.")
