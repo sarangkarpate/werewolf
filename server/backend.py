@@ -1,5 +1,6 @@
 import random
 from typing import Dict, List
+
 from util.utils import pretty_print_dictionary
 
 
@@ -17,7 +18,7 @@ class Role:
         return hash((self.name, self.party))
 
 
-class Room():
+class Room:
     def __init__(self, moderator: int):
         self.roles = {}
         self.players = set()
@@ -62,8 +63,11 @@ class Room():
 
         players = list(self.players)
         if len(roles) != len(self.players):
-            raise Exception("Cannot start game because Role count is {} and Player count is {}".format(len(roles),
-                                                                                                       len(self.players)))
+            raise Exception(
+                "Cannot start game because Role count is {} and Player count is {}".format(
+                    len(roles), len(self.players)
+                )
+            )
         random.shuffle(roles)
 
         # Resetting assigned roles
