@@ -8,6 +8,7 @@ Created on Thu Sep 15 17:00:51 2022
 """
 
 import discord
+import createButtons
 from discord.ext.commands import Bot
 from server.backend import Room, Role
 from util.utils import fetch_bot_token, fetch_bot_command_prefix, get_user, pretty_print_dictionary
@@ -74,6 +75,7 @@ async def create_room(ctx, *args):
     await ctx.send("Join the new %s village by clicking here!" % room, view=view)
 
     await get_moderator(ctx, room).send("Room %s created." % room)
+    await createButtons.button_galore(ctx, Rooms, room)
 
 @bot.command(name="create_open", brief="<room> Creates a room (village) where anyone can add roles",
              description="Use this command to create a room where anyone can add roles"
@@ -193,7 +195,6 @@ async def invite_player_offline(ctx, *args):
     if not room in Rooms:
         await ctx.author.send("A room with the name '%s' doesn't exist." % room)
         return
-    print(args)
     Rooms[room].add_players([p for p in args[1:]])
     await get_moderator(ctx, room).send(
         "Added Players %s to room %s" % ([p for p in args[1:]], room))
