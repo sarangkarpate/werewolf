@@ -1,11 +1,14 @@
 import json
 import os
+from typing import Any, Dict, Optional
 
-TOKEN_KEY = 'Token'
-PREFIX_KEY = 'Prefix'
+import discord
+
+TOKEN_KEY = "Token"
+PREFIX_KEY = "Prefix"
 
 
-def fetch_bot_token():
+def fetch_bot_token() -> str:
     """
     Fetches bot's token either from a Config file if present / otherwise assumes environment variable has token set
     This is useful for Deploying to cloud services and test locally as well
@@ -23,7 +26,7 @@ def fetch_bot_token():
         return token
 
 
-def fetch_bot_command_prefix():
+def fetch_bot_command_prefix() -> str:
     """
     Fetches bot command prefix (to be used in Discord app)
     :return: String
@@ -33,7 +36,9 @@ def fetch_bot_command_prefix():
         return config[PREFIX_KEY]
 
 
-def get_user(ctx, identifier):
+def get_user(
+    ctx: discord.ext.commands.Context, identifier: str
+) -> Optional[discord.Member]:
     """
     Helper method that gets a User based on Context and an Identifier
     :param ctx: Context
@@ -43,7 +48,7 @@ def get_user(ctx, identifier):
     return ctx.guild.get_member(int(identifier))
 
 
-def pretty_print_dictionary(input_dictionary):
+def pretty_print_dictionary(input_dictionary: Dict[Any, Any]) -> str:
     """
     Given an input Dictionary - provides a pretty-printed string
     :param input_dictionary: Dictionary
