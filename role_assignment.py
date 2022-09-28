@@ -9,10 +9,10 @@ Created on Thu Sep 15 17:00:51 2022
 
 from typing import Optional
 
-import CreateButtons
 import discord
 from discord.ext.commands import Bot
 
+import CreateButtons
 from server.backend import Role, Room
 from util.utils import (
     fetch_bot_command_prefix,
@@ -99,7 +99,7 @@ async def create_room(ctx: discord.ext.commands.Context, *args: str):
     await ctx.send("Join the new %s village by clicking here!" % room, view=view)
 
     await get_moderator(ctx, room).send("Room %s created." % room)
-    await createButtons.button_galore(ctx, Rooms, room)
+    await CreateButtons.button_galore(ctx, Rooms, room)
 
 
 @bot.command(
