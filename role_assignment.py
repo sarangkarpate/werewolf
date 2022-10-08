@@ -103,12 +103,12 @@ async def create_room(ctx: discord.ext.commands.Context, *args: str):
     await CreateButtons.button_galore(ctx, Rooms, room)
 
 
-@bot.command(name="open_add", brief="<room> Creates a room (village) where anyone can add roles",
+@bot.command(name="open", brief="<room> Creates a room (village) where anyone can add roles",
              description="Use this command to create a room where anyone can add roles"
                          "Syntax: create <room_name>")
-async def open_add(ctx, *args):
+async def open(ctx, *args):
     if not args:
-        await ctx.author.send("<room name> is a required argument to the !open_add command.")
+        await ctx.author.send("<room name> is a required argument to the !open command.")
         return
     room = args[0]
     if not ctx.message.author.id == Rooms[room].moderator:
@@ -259,20 +259,22 @@ async def invite_player(ctx: discord.ext.commands.Context, *args: str):
 
 @bot.command(
     name="invite_offline",
-    brief="<room> <player1> <player2> ... Adds person/people without dicrod toa  room",
-    description="Use this command to include players without discord. There role will be sent to the moderator."
+    brief="<room> <player1> <player2> ... Adds person/people without dicrod to a room",
+    description="Use this command to include players without discord. Their role will be sent to the moderator."
     "Syntax: invite <room_name> <player1> <player2> ...",
 )
 async def invite_player_offline(ctx, *args):
-    if not args:
+    if len(args) < 2:
         await ctx.author.send(
-            "<room name> is a required argument to the !invite command."
+            "<room name> and <player name> is a required argument to the !invite command."
         )
         return
     room = args[0]
-    if not room in Rooms:
+    if room not in Rooms:
         await ctx.author.send("A room with the name '%s' doesn't exist." % room)
         return
+
+
     Rooms[room].add_players([p for p in args[1:]])
     await get_moderator(ctx, room).send(
         "Added Players %s to room %s" % ([p for p in args[1:]], room)
@@ -474,7 +476,7 @@ async def delete_room(ctx: discord.ext.commands.Context, *args: str):
     if not ctx.message.author.id == Rooms[room].moderator:
         await ctx.author.send("You must be the moderator for the room to delete rooms.")
         return
-    if not room in Rooms:
+    if room not in Rooms:
         await ctx.author.send(
             "A room with the name '%s' doesn't exist. It may have been deleted already"
             % room
@@ -527,15 +529,15 @@ async def update_moderator(ctx: discord.ext.commands.Context, *args: str):
 
 
 @bot.command(
-    name="close_add",
+    name="restrict",
     brief="<room> makes so only moderator can add roles",
     description="Use this command so that a open room will only allow moderator to add roles"
     "Syntax: update_moderator <room_name> <new_moderator>",
 )
-async def close_add(ctx, *args):
+async def restrict(ctx, *args):
     if not args:
         await ctx.author.send(
-            "<room name> is a required argument to the !close_add command."
+            "<room name> is a required argument to the !restrict command."
         )
         return
     room = args[0]
@@ -544,7 +546,7 @@ async def close_add(ctx, *args):
             "You must be the current moderator to update the village open attribute"
         )
         return
-    if Rooms[room].open == False:
+    if not Rooms[room].open:
         await ctx.author.send("This room is already closed- only you can add new roles")
         return
     Rooms[room].open = False

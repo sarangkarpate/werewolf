@@ -5,7 +5,7 @@ import discord
 style = {'bear': ['🐻', discord.ButtonStyle.primary], 'Ammar-bear': ['🧸', discord.ButtonStyle.primary],
          'seer': ['🤓', discord.ButtonStyle.primary], 'confused seer': ['🥴', discord.ButtonStyle.primary],
          'one-eyed seer': ['🧐', discord.ButtonStyle.primary], 'innocent child': ['👧', discord.ButtonStyle.green],
-         'grenidier': ['💣', discord.ButtonStyle.green], 'gunsmith': ['🔫', discord.ButtonStyle.green],
+         'grenadier': ['💣', discord.ButtonStyle.green], 'gunsmith': ['🔫', discord.ButtonStyle.green],
          'trickster gunsmith': ['🔫', discord.ButtonStyle.green], 'mortician': ['🥼', discord.ButtonStyle.green],
          'Dr.Boom': ['🧨', discord.ButtonStyle.green], 'cut throat': ['🪒', discord.ButtonStyle.green],
          'PI': ['🤓', discord.ButtonStyle.green], 'hunter': ['🏹', discord.ButtonStyle.green],
@@ -13,14 +13,17 @@ style = {'bear': ['🐻', discord.ButtonStyle.primary], 'Ammar-bear': ['🧸', d
          'mason': ['👥', discord.ButtonStyle.green], 'thing': ['☝', discord.ButtonStyle.green],
          'chupacabra': ['😈', discord.ButtonStyle.green], 'tough guy': ['💪', discord.ButtonStyle.green],
          'wheelsmith': ['📀', discord.ButtonStyle.green], "doctor": ['🩺', discord.ButtonStyle.green],
-         'body guard': ['🏋️‍♀️', discord.ButtonStyle.green], 'witch': ['🎆', discord.ButtonStyle.green],
+         'body guard': ['🏋️‍♀️', discord.ButtonStyle.green], 'witch': ['🧙', discord.ButtonStyle.green],
          'tanner': ['🎭', discord.ButtonStyle.grey], 'serial killer': ['⚰', discord.ButtonStyle.grey],
          'hoodlum': ['🤥', discord.ButtonStyle.grey], 'cruel tanner': ['🎆', discord.ButtonStyle.grey],
          'jester': ['🤡', discord.ButtonStyle.grey], 'wolf': ['🐺', discord.ButtonStyle.red],
          'wolf man': ['🐺', discord.ButtonStyle.red], 'dire wolf': ['🐺', discord.ButtonStyle.red],
          'pet wolf': ['🐶', discord.ButtonStyle.red], 'armored wolf': ['🦺', discord.ButtonStyle.red],
          'grandma wolf': ['👩‍🦳', discord.ButtonStyle.red], 'slasher wolf': ['🪒', discord.ButtonStyle.red],
-         'alpha wolf': ['👥', discord.ButtonStyle.red], 'wolf cub': ['🦝', discord.ButtonStyle.red]}
+         'alpha wolf': ['👥', discord.ButtonStyle.red], 'wolf cub': ['🦝', discord.ButtonStyle.red],
+         'slightly mad bomber': ['🥽', discord.ButtonStyle.red], 'sorceress': [':🎆', discord.ButtonStyle.red],
+         'mason-sorceress': ['👥', discord.ButtonStyle.red]}
+
 
 seer_roles = ['bear', 'Ammar-bear', 'seer', 'confused seer', 'one-eyed seer']
 deadly_roles = ['innocent child', 'grenidier', 'gunsmith', 'trickster gunsmith', 'mortician', 'Dr.Boom',
