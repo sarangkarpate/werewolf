@@ -59,3 +59,17 @@ def pretty_print_dictionary(input_dictionary: Dict[Any, Any]) -> str:
     for item in sorted(input_dictionary):
         response += str(item) + " : " + str(input_dictionary[item]) + "\n"
     return response
+
+def game_dict(ctx,items):
+    """
+    Given a list of items (player,role)- provides a dictionary with each name stored as a key as a string
+    :param: list of tuples
+    :return: dictionary
+    """
+    game_diction = {}
+    for player, role in items:
+        if isinstance(player, str) != True:
+            game_diction[get_user(ctx, player).display_name] = role
+        else:
+            game_diction[player] = role
+    return game_diction

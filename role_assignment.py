@@ -8,15 +8,18 @@ Created on Thu Sep 15 17:00:51 2022
 """
 
 from typing import Optional
+
 import discord
 from discord.ext.commands import Bot
 
+import CreateButtons
 from server.backend import Role, Room
 from util.utils import (
     fetch_bot_command_prefix,
     fetch_bot_token,
     get_user,
     pretty_print_dictionary,
+    game_dict
 )
 
 Rooms = {}
@@ -32,7 +35,9 @@ bot = discord.ext.commands.Bot(
 )
 
 
-def get_moderator(ctx: discord.ext.commands.Context, room_name: str) -> Optional[discord.Member]:
+def get_moderator(
+    ctx: discord.ext.commands.Context, room_name: str
+) -> Optional[discord.Member]:
     """
     Gets a moderator based on context.
     :param ctx:
@@ -44,6 +49,16 @@ def get_moderator(ctx: discord.ext.commands.Context, room_name: str) -> Optional
     else:
         # For DM scenarios
         return ctx.author
+
+
+def game_dict(ctx, items):
+    game_diction = {}
+    for player, role in items:
+        if isinstance(player, str) != True:
+            game_diction[get_user(ctx, player).display_name] = role
+        else:
+            game_diction[player] = role
+    return game_diction
 
 
 @bot.command(
@@ -62,7 +77,53 @@ async def create_room(ctx: discord.ext.commands.Context, *args: str):
         await ctx.author.send("A room with the name '%s' already exists." % room)
         return
     Rooms[room] = Room(moderator=ctx.author.id)
+
+    ###code to add a join button
+    button = discord.ui.Button(
+        label="Join village", emoji="🐺", style=discord.ButtonStyle.green
+    )
+
+    async def button_callback(interaction):
+        if interaction.user.id in Rooms[room].players:
+            await interaction.user.send("You are already in room %s" % room)
+            return
+        Rooms[room].add_player(interaction.user.id)
+        await interaction.user.send("You have joined room %s" % room)
+        await interaction.response.edit_message(
+            content="Join the new %s village by clicking here! %s has joined"
+            % (room, interaction.user.display_name)
+        )
+
+    button.callback = button_callback
+    view = discord.ui.View()
+    view.add_item(button)
+    await ctx.send("Join the new %s village by clicking here!" % room, view=view)
+
     await get_moderator(ctx, room).send("Room %s created." % room)
+    await CreateButtons.button_galore(ctx, Rooms, room)
+
+
+@bot.command(name="open", brief="<room> Creates a room (village) where anyone can add roles",
+             description="Use this command to create a room where anyone can add roles"
+                         "Syntax: create <room_name>")
+async def open(ctx, *args):
+    if not args:
+        await ctx.author.send("<room name> is a required argument to the !open command.")
+        return
+    room = args[0]
+    if not ctx.message.author.id == Rooms[room].moderator:
+        await ctx.author.send("You must be the current moderator to update the village open attribute")
+        return
+    if Rooms[room].open == True:
+        await ctx.author.send("This room is already open- anyone can add new roles with the !add comand")
+        return
+    Rooms[room].open = True
+    await get_moderator(ctx, room).send(
+        "Room %s is an open room so anyone may add roles." % room
+    )
+    await ctx.send(
+        "It takes a village to make a village. Anyone may add roles to %s." % room
+    )
 
 
 @bot.command(
@@ -142,6 +203,33 @@ async def remove_player(ctx: discord.ext.commands.Context, *args: str):
 
 
 @bot.command(
+    name="remove_offline",
+    brief="<room> <player1> <player2> ... Removes offline players from the room",
+    description="Use this command to remove players not on discord from a room."
+    "Syntax: remove <room_name> <player1> <player2> ...",
+)
+async def remove_player_offline(ctx, *args):
+    if not args:
+        await ctx.author.send(
+            "<room name> is a required argument to the !remove command."
+        )
+        return
+    room = args[0]
+    if not room in Rooms:
+        await ctx.author.send("A room with the name '%s' doesn't exist." % room)
+        return
+    if not ctx.message.author.id == Rooms[room].moderator:
+        await ctx.author.send(
+            "You must be the moderator for the room to remove players."
+        )
+        return
+    Rooms[room].remove_players([p for p in args[1:]])
+    await get_moderator(ctx, room).send(
+        "Removed Players %s from room %s" % ([p for p in args[1:]], room)
+    )
+
+
+@bot.command(
     name="invite",
     brief="<room> <player1> <player2> ... Invites players to the room",
     description="Use this command to invite players to a room."
@@ -170,6 +258,30 @@ async def invite_player(ctx: discord.ext.commands.Context, *args: str):
 
 
 @bot.command(
+    name="invite_offline",
+    brief="<room> <player1> <player2> ... Adds person/people without dicrod to a room",
+    description="Use this command to include players without discord. Their role will be sent to the moderator."
+    "Syntax: invite <room_name> <player1> <player2> ...",
+)
+async def invite_player_offline(ctx, *args):
+    if len(args) < 2:
+        await ctx.author.send(
+            "<room name> and <player name> is a required argument to the !invite command."
+        )
+        return
+    room = args[0]
+    if room not in Rooms:
+        await ctx.author.send("A room with the name '%s' doesn't exist." % room)
+        return
+
+
+    Rooms[room].add_players([p for p in args[1:]])
+    await get_moderator(ctx, room).send(
+        "Added Players %s to room %s" % ([p for p in args[1:]], room)
+    )
+
+
+@bot.command(
     name="add",
     brief="<room> <role> OR <room> <role> <count> Add roles to a room",
     description="Use this command to add roles to a room."
@@ -184,7 +296,7 @@ async def add_role(ctx: discord.ext.commands.Context, *args: str):
     if not room in Rooms:
         await ctx.author.send("A room with the name '%s' doesn't exist." % room)
         return
-    if not ctx.message.author.id == Rooms[room].moderator:
+    if not ctx.message.author.id == Rooms[room].moderator and Rooms[room].open == False:
         await ctx.author.send("You must be the moderator for the room to add roles.")
         return
     if len(args) == 1:
@@ -249,7 +361,8 @@ async def subtract_role(ctx: discord.ext.commands.Context, *args: str):
     name="start",
     brief="<room> Starts a game; assigns roles",
     description="Use this command to start a game."
-    "Syntax: start <room> - This assigns roles to all players (sends a DM as well); also sends moderator a list of all role - players mapping",
+    "Syntax: start <room> - This assigns roles to all players (sends a DM as well); "
+    "also sends moderator a list of all role - players mapping",
 )
 async def assign_roles(ctx: discord.ext.commands.Context, *args: str):
     if not args:
@@ -269,12 +382,14 @@ async def assign_roles(ctx: discord.ext.commands.Context, *args: str):
         return
     try:
         game = village.start_game()
-        game_description = pretty_print_dictionary(
-            {get_user(ctx, player).display_name: role for player, role in game.items()}
+        await get_user(ctx, village.moderator).send(
+            pretty_print_dictionary(game_dict(ctx, game.items()))
         )
-        await get_user(ctx, village.moderator).send(game_description)
+
         for player, role in game.items():
-            await get_user(ctx, player).send("Game: %s, Role: %s" % (room, role))
+            #checks to make sure roles are only sent to discord users, not players stored as strings
+            if not isInstance(player, str):
+                await get_user(ctx, player).send("Game: %s, Role: %s" % (room, role))
         village.started = True
     except Exception as msg:
         # Role count is not the same as Player count while starting the game
@@ -294,23 +409,22 @@ async def list_room_info(ctx: discord.ext.commands.Context, *args: str):
     if room not in Rooms:
         await ctx.author.send("A room with the name '%s' doesn't exist." % room)
         return
-    await ctx.send(
-        "Room: %s\nModerator: %s\nPlayers: %s\nRoles\n-----------\n%s"
-        % (
-            room,
-            get_user(ctx, int(Rooms[room].moderator)).display_name,
-            str([get_user(ctx, x).display_name for x in Rooms[room].players]),
-            str(Rooms[room].get_role_information()),
-        )
-    )
+
+    player_names = []
+    for player in Rooms[room].players:
+        try:
+            player_names.append(get_user(ctx, player).display_name)
+        except ValueError:
+            player_names.append(player)
+    total_roles = sum([value for value in Rooms[room].roles.values()])
+    await ctx.send("Room: %s\nModerator: %s\nPlayers: %s (%s Total)\nRoles\n-----------\n %s (%s Total)" % (
+        room, get_user(ctx, int(Rooms[room].moderator)).display_name, sorted(player_names), str(len(player_names)),
+        str(Rooms[room].get_role_information()), str(total_roles)))
 
 
-@bot.command(
-    name="listrooms",
-    brief="Lists all rooms and associated moderators",
-    description="List all Rooms and their moderators",
-)
-async def list_all_rooms(ctx: discord.ext.commands.Context):
+@bot.command(name="listrooms", brief="Lists all rooms and associated moderators",
+             description="List all Rooms and their moderators")
+async def list_all_rooms(ctx):
     response_msg = ""
     for room in Rooms:
         response_msg += (
@@ -344,13 +458,11 @@ async def reveal_room_info(ctx: discord.ext.commands.Context, *args: str):
     if not ctx.message.author.id == Rooms[room].moderator:
         await ctx.author.send("You must be the moderator for the room to reveal roles.")
         return
-
-    game_mapping = {
-        get_user(ctx, player).display_name: role
-        for player, role in Rooms[room].assigned_roles.items()
-    }
-    game_description = pretty_print_dictionary(game_mapping)
+    game_description = pretty_print_dictionary(
+        game_dict(ctx, Rooms[room].assigned_roles.items())
+    )
     await ctx.send(game_description)
+    Rooms[room].started = False
 
 
 @bot.command(name="delete", brief="<room> Deletes a room")
@@ -364,7 +476,7 @@ async def delete_room(ctx: discord.ext.commands.Context, *args: str):
     if not ctx.message.author.id == Rooms[room].moderator:
         await ctx.author.send("You must be the moderator for the room to delete rooms.")
         return
-    if not room in Rooms:
+    if room not in Rooms:
         await ctx.author.send(
             "A room with the name '%s' doesn't exist. It may have been deleted already"
             % room
@@ -381,6 +493,7 @@ async def delete_room(ctx: discord.ext.commands.Context, *args: str):
     "Syntax: update_moderator <room_name> <new_moderator>",
 )
 async def update_moderator(ctx: discord.ext.commands.Context, *args: str):
+
     if len(args) != 2:
         await ctx.author.send(
             "<room name> and <new_moderator> are the required argument to the !update_moderator command."
@@ -414,5 +527,30 @@ async def update_moderator(ctx: discord.ext.commands.Context, *args: str):
         )
         await get_user(ctx, Rooms[room].moderator).send(game_description)
 
+
+@bot.command(
+    name="restrict",
+    brief="<room> makes so only moderator can add roles",
+    description="Use this command so that a open room will only allow moderator to add roles"
+    "Syntax: update_moderator <room_name> <new_moderator>",
+)
+async def restrict(ctx, *args):
+    if not args:
+        await ctx.author.send(
+            "<room name> is a required argument to the !restrict command."
+        )
+        return
+    room = args[0]
+    if not ctx.message.author.id == Rooms[room].moderator:
+        await ctx.author.send(
+            "You must be the current moderator to update the village open attribute"
+        )
+        return
+    if not Rooms[room].open:
+        await ctx.author.send("This room is already closed- only you can add new roles")
+        return
+    Rooms[room].open = False
+    await get_moderator(ctx, room).send("Room %s can now only have rolls added by you." % room)
+    await ctx.send(("Room %s can now only have rolls added by the moderator." % room))
 
 bot.run(fetch_bot_token())
