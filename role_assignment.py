@@ -99,7 +99,7 @@ async def create_room(ctx: discord.ext.commands.Context, *args: str):
     view.add_item(button)
     await ctx.send("Join the new %s village by clicking here!" % room, view=view)
 
-    await get_moderator(ctx, room).send("Room %s created." % room)
+    await get_moderator(ctx, room).send("Room %s created. You have 15 minutes to use these buttons to add roles!" % room)
     await CreateButtons.button_galore(ctx, Rooms, room)
 
 
