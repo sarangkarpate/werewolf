@@ -388,7 +388,7 @@ async def assign_roles(ctx: discord.ext.commands.Context, *args: str):
 
         for player, role in game.items():
             #checks to make sure roles are only sent to discord users, not players stored as strings
-            if not isInstance(player, str):
+            if not isinstance(player, str):
                 await get_user(ctx, player).send("Game: %s, Role: %s" % (room, role))
         village.started = True
     except Exception as msg:
