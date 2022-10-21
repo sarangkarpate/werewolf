@@ -21,6 +21,7 @@ from util.utils import (
     pretty_print_dictionary,
     game_dict
 )
+import platform
 
 Rooms = {}
 
@@ -552,5 +553,13 @@ async def restrict(ctx, *args):
     Rooms[room].open = False
     await get_moderator(ctx, room).send("Room %s can now only have rolls added by you." % room)
     await ctx.send(("Room %s can now only have rolls added by the moderator." % room))
+
+@bot.command(
+    name="server_info",
+    brief="tells info about hosting server server",
+    description="tells info about hosting server server",
+)
+async def server_info(ctx, *args):
+    await ctx.send(platform.platform())
 
 bot.run(fetch_bot_token())

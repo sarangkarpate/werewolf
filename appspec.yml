@@ -1,0 +1,23 @@
+
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/werewolf
+hooks:
+  BeforeInstall:
+    - location: scripts/before_install.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/install.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: scripts/start.sh
+      timeout: 300
+      runas: root
+  # ApplicationStop:
+  #   - location: scripts/uninstall.sh
+  #     timeout: 300
+  #     runas: root
