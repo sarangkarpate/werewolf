@@ -7,3 +7,5 @@ then
 fi
 
 mkdir -p $FOLDER
+
+pkill -f role_assignment.py
